@@ -7,11 +7,7 @@ interface Props {
 }
 
 export default function BlogDetail({ blogId }: Props) {
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<Blog>({
+  const { data, isLoading, isError } = useQuery<Blog>({
     queryKey: ["blog", blogId],
     queryFn: () => getBlogById(blogId as number),
     enabled: !!blogId,
@@ -34,38 +30,57 @@ export default function BlogDetail({ blogId }: Props) {
   return (
     <article className="bg-white rounded-xl shadow p-6 space-y-6">
 
-      
+      {/* COVER IMAGE */}
       <img
         src={data.coverImage}
         alt={data.title}
         className="w-full h-64 object-cover rounded-lg"
       />
 
-     
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <div className="flex gap-2">
-          {data.category.map((cat) => (
-            <span
-              key={cat}
-              className="bg-blue-100 text-blue-700 px-2 py-1 rounded"
-            >
-              {cat}
-            </span>
-          ))}
-        </div>
-
+      {/* CATEGORY + READ TIME (TOP LINE) */}
+      <div className="text-xs text-gray-500 flex items-center gap-2 uppercase tracking-wide">
+        <span>{data.category.join(" & ")}</span>
+        <span>·</span>
         <span>{readTime} min read</span>
       </div>
 
-     
-      <h1 className="text-2xl font-bold">{data.title}</h1>
+      {/* TITLE */}
+      <h1 className="text-3xl font-bold leading-tight">
+        {data.title}
+      </h1>
 
-     
-      <button className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
+      {/* SHARE BUTTON */}
+      <button className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 w-fit">
         Share Article
       </button>
 
-      
+      {/* INFO BOX (CATEGORY | READ TIME | DATE) */}
+      <div className="grid grid-cols-3 overflow-hidden rounded-lg border text-center text-sm">
+
+        <div className="border-r px-4 py-3">
+          <p className="text-xs text-gray-500 uppercase">Category</p>
+          <p className="font-semibold">{data.category.join(" & ")}</p>
+        </div>
+
+        <div className="border-r px-4 py-3">
+          <p className="text-xs text-gray-500 uppercase">Read Time</p>
+          <p className="font-semibold">{readTime} Mins</p>
+        </div>
+
+        <div className="px-4 py-3">
+          <p className="text-xs text-gray-500 uppercase">Date</p>
+          <p className="font-semibold">
+            {new Date(data.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+
+      </div>
+
+      {/* CONTENT */}
       <p className="text-gray-700 leading-relaxed whitespace-pre-line">
         {data.content}
       </p>
