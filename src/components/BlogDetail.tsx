@@ -1,43 +1,58 @@
+import { useQuery } from "@tanstack/react-query";
+import { getBlogById } from "../api/blogs";
 import { Blog } from "../types/blog";
-import { Card, CardContent } from "@/components/ui/card";
-import { timeAgo } from "@/lib/timeAgo";
 
 interface Props {
-  blog: Blog;
-  onClick: () => void;
+  blogId: number | null;
 }
 
-export default function BlogCard({ blog, onClick }: Props) {
+export default function BlogDetail({ blogId }: Props) {
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery<Blog>({
+    queryKey: ["blog", blogId],
+    queryFn: () => getBlogById(blogId as number),
+    enabled: !!blogId,
+  });
+
+  if (!blogId) {
+    return <p className="text-gray-500">Select a blog to read</p>;
+  }
+
+  if (isLoading) {
+    return <p>Loading blog...</p>;
+  }
+
+  if (isError || !data) {
+    return <p>Failed to load blog</p>;
+  }
+
   return (
-    <Card
-      onClick={onClick}
-      className="cursor-pointer transition hover:shadow-md"
-    >
-      <CardContent className="p-4 space-y-2">
+    <div className="bg-white rounded-xl shadow p-6">
+      <img
+        src={data.coverImage}
+        alt={data.title}
+        className="w-full h-64 object-cover rounded-lg mb-6"
+      />
 
-        {/* HEADER ROW */}
-        <div className="flex items-start justify-between">
-          {/* CATEGORY (LEFT) */}
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-            {blog.category.join(", ")}
-          </p>
-
-          {/* ✅ TIME (TOP-RIGHT CORNER) */}
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {timeAgo(blog.date)}
+      <div className="flex gap-2 mb-2">
+        {data.category.map((cat) => (
+          <span
+            key={cat}
+            className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
+          >
+            {cat}
           </span>
-        </div>
+        ))}
+      </div>
 
-        {/* TITLE */}
-        <h3 className="font-semibold leading-tight">
-          {blog.title}
-        </h3>
+      <h1 className="text-2xl font-bold mb-4">{data.title}</h1>
 
-        {/* DESCRIPTION */}
-        <p className="text-sm text-gray-600 line-clamp-2">
-          {blog.description}
-        </p>
-      </CardContent>
-    </Card>
+      <p className="text-gray-700 leading-relaxed">
+        {data.content}
+      </p>
+    </div>
   );
 }
